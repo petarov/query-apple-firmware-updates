@@ -9,7 +9,7 @@ import (
 )
 
 type ServerContext struct {
-	DevicesIndex map[string]string
+	Devices *db.DevicesIndex
 
 	router *http.ServeMux
 }
@@ -20,11 +20,14 @@ func ServeNow() (err error) {
 
 	attachApi(ctx)
 
-	ctx.DevicesIndex, err = db.LoadDevices(config.DevicePath)
+	ctx.Devices, err = db.LoadDevices(config.DevicePath)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("DEV: %v\n", ctx.DevicesIndex)
+	v, _ := ctx.Devices.Get("iPod3,1")
+	v2, _ := ctx.Devices.Get("iPod touch (3rd generation)")
+	fmt.Printf("DEV: %v\n", v)
+	fmt.Printf("DEV: %v\n", v2)
 
 	fmt.Printf("Serving at %s and port %d ...\n", config.ListenAddress, config.ListenPort)
 
