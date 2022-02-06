@@ -24,10 +24,10 @@ func ServeNow() (err error) {
 	if err != nil {
 		return err
 	}
-	v, _ := ctx.Devices.Get("iPod3,1")
-	v2, _ := ctx.Devices.Get("iPod touch (3rd generation)")
-	fmt.Printf("DEV: %v\n", v)
-	fmt.Printf("DEV: %v\n", v2)
+
+	if err = db.InitDb(config.DbPath); err != nil {
+		return err
+	}
 
 	fmt.Printf("Serving at %s and port %d ...\n", config.ListenAddress, config.ListenPort)
 
