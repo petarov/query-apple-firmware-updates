@@ -16,3 +16,4 @@
 
 # Others
 devices.json
+*.db

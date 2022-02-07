@@ -25,7 +25,7 @@ func ServeNow() (err error) {
 		return err
 	}
 
-	if err = db.InitDb(config.DbPath); err != nil {
+	if err = db.InitDb(config.DbPath, ctx.Devices); err != nil {
 		return err
 	}
 
