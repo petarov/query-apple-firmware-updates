@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -20,18 +21,32 @@ func attachApi(serverCtx *ServerContext) {
 
 	api := &Api{serverCtx}
 	api.ctx.router.HandleFunc("/api/index", api.handleIndex())
+	api.ctx.router.HandleFunc("/api/devices", api.handleDevices())
+
 }
 
 func (api *Api) handleIndex() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		routes := map[string]string{
+			"/api":         "This",
+			"/api/devices": "Fetch all devices",
+		}
+		resp, _ := json.Marshal(routes)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(resp)
+	}
+}
+
+func (api *Api) handleDevices() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		devices, err := db.FetchAllDevices()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprintf(w, "Error: %v", err)
 		} else {
-			for _, d := range devices {
-				fmt.Fprintf(w, "Device: %d\t%s\t%s\n", d.Id, d.Product, d.Name)
-			}
+			resp, _ := json.Marshal(devices)
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(resp)
 		}
 	}
 }

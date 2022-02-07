@@ -8,19 +8,19 @@ import (
 )
 
 type Device struct {
-	Id      int
-	Product string
-	Name    string
+	Id      int    `json:"-"`
+	Product string `json:"product"`
+	Name    string `json:"name"`
 }
 
 type DeviceUpdate struct {
-	Id         int
-	DeviceId   int
-	Device     *Device
-	BuildId    string
-	Version    string
-	ReleasedOn string
-	Attributes string
+	Id         int     `json:"-"`
+	DeviceId   int     `json:"-"`
+	Device     *Device `json:"device"`
+	BuildId    string  `json:"build_id"`
+	Version    string  `json:"version"`
+	ReleasedOn string  `json:"released_on"`
+	Attributes string  `json:"attributes"`
 }
 
 var db *sql.DB
