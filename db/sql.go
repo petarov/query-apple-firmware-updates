@@ -45,7 +45,7 @@ func InitDb(path string, index *DevicesIndex) (err error) {
 		return fmt.Errorf("Failed adding devices index to database : %w", err)
 	}
 
-	fmt.Printf("Added %d devices to database.", count)
+	fmt.Printf("Added %d new device(s) to database.\n", count)
 
 	return nil
 }
@@ -85,18 +85,26 @@ func createSchema() (err error) {
 func importDevices(index *DevicesIndex) (int, error) {
 	inserted := 0
 
+	devices, err := FetchAllDevices()
+	if err != nil {
+		return 0, err
+	}
+
+	lookup := make(map[string]*Device)
+	for _, d := range devices {
+		lookup[d.Product] = d
+	}
+
 	for k, v := range index.revIndex {
-		result, err := db.Exec(`INSERT INTO Device(product, name) VALUES($1, $2)`, k, v)
-		if err != nil {
-			return 0, err
-		}
+		_, ok := lookup[k]
+		if !ok {
+			_, err := db.Exec(`INSERT INTO Device(product, name) VALUES($1, $2)`, k, v)
+			if err != nil {
+				return 0, err
+			}
 
-		rowsAffected, err := result.RowsAffected()
-		if err != nil {
-			return 0, err
+			inserted += 1
 		}
-
-		inserted += int(rowsAffected)
 	}
 
 	return inserted, nil
