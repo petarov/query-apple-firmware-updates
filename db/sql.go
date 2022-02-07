@@ -25,12 +25,11 @@ type DeviceUpdate struct {
 
 var db *sql.DB
 
-func InitDb(path string, index *DevicesIndex) (err error) {
+func InitDb(path string, jsonDB *DevicesJsonDB) (err error) {
 	db, err = sql.Open("sqlite3", path)
 	if err != nil {
 		return fmt.Errorf("Error opening database at %s : %w", path, err)
 	}
-	// defer db.Close()
 
 	if err = db.Ping(); err != nil {
 		return fmt.Errorf("Failed database ping : %w", err)
@@ -40,7 +39,7 @@ func InitDb(path string, index *DevicesIndex) (err error) {
 		return err
 	}
 
-	count, err := importDevices(index)
+	count, err := importDevices(jsonDB)
 	if err != nil {
 		return fmt.Errorf("Failed adding devices index to database : %w", err)
 	}
@@ -82,7 +81,7 @@ func createSchema() (err error) {
 	return nil
 }
 
-func importDevices(index *DevicesIndex) (int, error) {
+func importDevices(jsonDB *DevicesJsonDB) (int, error) {
 	inserted := 0
 
 	devices, err := FetchAllDevices()
@@ -95,7 +94,7 @@ func importDevices(index *DevicesIndex) (int, error) {
 		lookup[d.Product] = d
 	}
 
-	for k, v := range index.revIndex {
+	for k, v := range jsonDB.mapping {
 		_, ok := lookup[k]
 		if !ok {
 			_, err := db.Exec(`INSERT INTO Device(product, name) VALUES($1, $2)`, k, v)

@@ -9,8 +9,6 @@ import (
 )
 
 type ServerContext struct {
-	Devices *db.DevicesIndex
-
 	router *http.ServeMux
 }
 
@@ -18,16 +16,16 @@ func ServeNow() (err error) {
 	ctx := new(ServerContext)
 	ctx.router = http.NewServeMux()
 
-	attachApi(ctx)
-
-	ctx.Devices, err = db.LoadDevices(config.DevicePath)
+	jsonDB, err := db.LoadDevices(config.DevicePath)
 	if err != nil {
 		return err
 	}
 
-	if err = db.InitDb(config.DbPath, ctx.Devices); err != nil {
+	if err = db.InitDb(config.DbPath, jsonDB); err != nil {
 		return err
 	}
+
+	attachApi(ctx)
 
 	fmt.Printf("Serving at %s and port %d ...\n", config.ListenAddress, config.ListenPort)
 
