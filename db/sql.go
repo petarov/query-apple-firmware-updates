@@ -101,3 +101,39 @@ func importDevices(index *DevicesIndex) (int, error) {
 
 	return inserted, nil
 }
+
+func FetchAllDevices() ([]*Device, error) {
+	rows, err := db.Query(`SELECT * FROM Device`)
+	if err != nil {
+		return nil, fmt.Errorf("Error fetching all devices: %w", err)
+	}
+	defer rows.Close()
+
+	devices := make([]*Device, 0)
+	for rows.Next() {
+		device := new(Device)
+		err := rows.Scan(&device.Id, &device.Product, &device.Name)
+		if err != nil {
+			return nil, fmt.Errorf("Error scanning device row: %w", err)
+		}
+		devices = append(devices, device)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return devices, nil
+}
+
+func FetchDevice(product string) (*Device, error) {
+	device := new(Device)
+
+	err := db.QueryRow(`SELECT * FROM Device WHERE id = $1`, product).Scan(
+		&device.Id, &device.Product, &device.Product)
+	if err != nil {
+		return nil, fmt.Errorf("Error fetching device by product '%s': %w", product, err)
+	}
+
+	return device, nil
+}

@@ -3,6 +3,8 @@ package service
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/petarov/query-apple-osupdates/db"
 )
 
 const (
@@ -22,6 +24,14 @@ func attachApi(serverCtx *ServerContext) {
 
 func (api *Api) handleIndex() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello World")
+		devices, err := db.FetchAllDevices()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "Error: %v", err)
+		} else {
+			for _, d := range devices {
+				fmt.Fprintf(w, "Device: %d\t%s\t%s\n", d.Id, d.Product, d.Name)
+			}
+		}
 	}
 }
