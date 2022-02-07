@@ -133,11 +133,11 @@ func FetchAllDevices() ([]*Device, error) {
 	return devices, nil
 }
 
-func FetchDevice(product string) (*Device, error) {
+func FetchDeviceByProduct(product string) (*Device, error) {
 	device := new(Device)
 
-	err := db.QueryRow(`SELECT * FROM Device WHERE id = $1`, product).Scan(
-		&device.Id, &device.Product, &device.Product)
+	err := db.QueryRow(`SELECT * FROM Device WHERE product = $1`, product).Scan(
+		&device.Id, &device.Product, &device.Name)
 	if err != nil {
 		return nil, fmt.Errorf("Error fetching device by product '%s': %w", product, err)
 	}
