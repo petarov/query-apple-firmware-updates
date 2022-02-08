@@ -9,12 +9,18 @@ import (
 )
 
 type ServerContext struct {
-	router *http.ServeMux
+	router     *http.ServeMux
+	ipswClient *http.Client
 }
 
 func ServeNow() (err error) {
 	ctx := new(ServerContext)
 	ctx.router = http.NewServeMux()
+
+	ctx.ipswClient, err = NewIPSWClient()
+	if err != nil {
+		return err
+	}
 
 	jsonDB, err := db.LoadDevices(config.DevicePath)
 	if err != nil {
