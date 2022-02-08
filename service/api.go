@@ -72,6 +72,7 @@ func (api *Api) handleDevices() http.HandlerFunc {
 			} else {
 				resp, _ := json.Marshal(devices)
 				w.Header().Set("Content-Type", "application/json")
+				// w.Header().Set("Content-Length", strconv.Itoa(len(resp)))
 				w.Write(resp)
 			}
 		}

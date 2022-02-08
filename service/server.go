@@ -36,7 +36,7 @@ func ServeNow() (err error) {
 	fmt.Printf("Serving at %s and port %d ...\n", config.ListenAddress, config.ListenPort)
 
 	if err = http.ListenAndServe(fmt.Sprintf("%s:%d",
-		config.ListenAddress, config.ListenPort), ctx.router); err != nil {
+		config.ListenAddress, config.ListenPort), EnableGzip(ctx.router)); err != nil {
 		return err
 	}
 
