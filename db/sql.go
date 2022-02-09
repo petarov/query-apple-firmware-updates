@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/petarov/query-apple-osupdates/client"
 )
 
 type Device struct {
@@ -20,7 +21,9 @@ type DeviceUpdate struct {
 	BuildId    string  `json:"build_id"`
 	Version    string  `json:"version"`
 	ReleasedOn string  `json:"released_on"`
-	Attributes string  `json:"attributes"`
+	Attributes struct {
+		IPSW *client.IPSWInfo `json:"ipsw"`
+	} `json:"attributes"`
 }
 
 var db *sql.DB

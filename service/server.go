@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/petarov/query-apple-osupdates/client"
 	"github.com/petarov/query-apple-osupdates/config"
 	"github.com/petarov/query-apple-osupdates/db"
 )
@@ -17,7 +18,7 @@ func ServeNow() (err error) {
 	ctx := new(ServerContext)
 	ctx.router = http.NewServeMux()
 
-	ctx.ipswClient, err = NewIPSWClient()
+	ctx.ipswClient, err = client.NewIPSWClient()
 	if err != nil {
 		return err
 	}

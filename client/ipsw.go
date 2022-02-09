@@ -1,4 +1,4 @@
-package service
+package client
 
 import (
 	"compress/gzip"
@@ -46,7 +46,7 @@ func getResponseBody(resp *http.Response) io.ReadCloser {
 	return reader
 }
 
-func IPSWGetInfo(ctx *ServerContext, product string) (ipsw []*IPSWInfo, err error) {
+func IPSWGetInfo(client *http.Client, product string) (ipsw []*IPSWInfo, err error) {
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf(INFO_URL, product), nil)
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func IPSWGetInfo(ctx *ServerContext, product string) (ipsw []*IPSWInfo, err erro
 	// ua := uarand.GetRandom()
 	// req.Header.Add("User-Agent", ua)
 
-	resp, err := ctx.ipswClient.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}

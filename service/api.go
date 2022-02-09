@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/petarov/query-apple-osupdates/client"
 	"github.com/petarov/query-apple-osupdates/db"
 )
 
@@ -86,7 +87,7 @@ func (api *Api) handleUpdateInfo() http.HandlerFunc {
 
 			// TODO: check database
 
-			ipsw, err := IPSWGetInfo(api.ctx, product)
+			ipsw, err := client.IPSWGetInfo(api.ctx.ipswClient, product)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				fmt.Fprintf(w, "Error: %v", err)
