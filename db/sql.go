@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -15,15 +16,13 @@ type Device struct {
 }
 
 type DeviceUpdate struct {
-	Id         int     `json:"-"`
-	DeviceId   int     `json:"-"`
-	Device     *Device `json:"device"`
-	BuildId    string  `json:"build_id"`
-	Version    string  `json:"version"`
-	ReleasedOn string  `json:"released_on"`
-	Attributes struct {
-		IPSW *client.IPSWInfo `json:"ipsw"`
-	} `json:"attributes"`
+	Id         int              `json:"-"`
+	DeviceId   int              `json:"-"`
+	Device     *Device          `json:"device"`
+	BuildId    string           `json:"build_id"`
+	Version    string           `json:"version"`
+	ReleasedOn string           `json:"released_on"`
+	Attributes *client.IPSWInfo `json:"attributes"`
 }
 
 var db *sql.DB
@@ -42,7 +41,7 @@ func InitDb(path string, jsonDB *DevicesJsonDB) (err error) {
 		return err
 	}
 
-	count, err := importDevices(jsonDB)
+	count, err := addDevices(jsonDB)
 	if err != nil {
 		return fmt.Errorf("Failed adding devices index to database : %w", err)
 	}
@@ -84,9 +83,7 @@ func createSchema() (err error) {
 	return nil
 }
 
-func importDevices(jsonDB *DevicesJsonDB) (int, error) {
-	inserted := 0
-
+func addDevices(jsonDB *DevicesJsonDB) (int, error) {
 	devices, err := FetchAllDevices()
 	if err != nil {
 		return 0, err
@@ -96,6 +93,8 @@ func importDevices(jsonDB *DevicesJsonDB) (int, error) {
 	for _, d := range devices {
 		lookup[d.Product] = d
 	}
+
+	inserted := 0
 
 	for k, v := range jsonDB.mapping {
 		_, ok := lookup[k]
@@ -146,4 +145,84 @@ func FetchDeviceByProduct(product string) (*Device, error) {
 	}
 
 	return device, nil
+}
+
+func FetchUpdatesByProduct(product string) ([]*DeviceUpdate, error) {
+	rows, err := db.Query(`
+	SELECT du.*, d.* FROM DeviceUpdate AS du
+	LEFT JOIN Device AS d ON du.device_id = d.id
+	WHERE d.product = $1`, product)
+	if err != nil {
+		return nil, fmt.Errorf("Error fetching device updates for %s: %w", product, err)
+	}
+	defer rows.Close()
+
+	updates := make([]*DeviceUpdate, 0)
+	for rows.Next() {
+		attributes := ""
+		update := new(DeviceUpdate)
+		update.Device = new(Device)
+
+		err := rows.Scan(&update.Id, &update.DeviceId, &update.BuildId, &update.Version, &update.ReleasedOn, &attributes,
+			&update.Device.Id, &update.Device.Product, &update.Device.Name)
+		if err != nil {
+			return nil, fmt.Errorf("Error scanning device row: %w", err)
+		}
+
+		err = json.Unmarshal([]byte(attributes), &update.Attributes)
+		if err != nil {
+			return nil, err
+		}
+
+		updates = append(updates, update)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return updates, nil
+}
+
+func AddUpdates(product string, updatesInfo []*client.IPSWInfo) (int, error) {
+	device, err := FetchDeviceByProduct(product)
+	if err != nil {
+		return 0, err
+	}
+
+	inserted := 0
+
+	stmt, err := db.Prepare(`INSERT INTO DeviceUpdate(device_id, build_id, version, released_on, attributes) 
+	VALUES(?, ?, ?, ?, ?)`)
+	if err != nil {
+		return 0, err
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		return 0, err
+	}
+
+	for _, v := range updatesInfo {
+		attributes, err := json.Marshal(v)
+		if err != nil {
+			return 0, err
+		}
+
+		_, err = stmt.Exec(device.Id, v.BuildId, v.Version, v.ReleaseDate, attributes)
+		if err != nil {
+			return 0, fmt.Errorf("Error adding device update to database: %w", err)
+		}
+
+		inserted += 1
+	}
+
+	stmt.Close()
+
+	err = tx.Commit()
+	if err != nil {
+		return 0, err
+	}
+
+	return inserted, nil
 }

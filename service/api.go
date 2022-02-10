@@ -83,22 +83,40 @@ func (api *Api) handleDevices() http.HandlerFunc {
 func (api *Api) handleUpdateInfo() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		product := strings.TrimPrefix(r.URL.Path, API_UPDATES+"/")
-		if len(product) > 0 {
 
-			// TODO: check database
+		if len(product) == 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("No product name specified!"))
+			return
+		}
 
+		updates, err := db.FetchUpdatesByProduct(product)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "Error fetching updates from database: %v", err)
+			return
+		}
+
+		if len(updates) > 0 {
+			fmt.Println("Fetching from database ....")
+
+			// TODO: schedule update
+			resp, _ := json.Marshal(updates)
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(resp)
+		} else {
+			fmt.Println("Fetching from remote ....")
 			ipsw, err := client.IPSWGetInfo(api.ctx.ipswClient, product)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				fmt.Fprintf(w, "Error: %v", err)
 			} else {
+				db.AddUpdates(product, ipsw)
+
 				resp, _ := json.Marshal(ipsw)
 				w.Header().Set("Content-Type", "application/json")
 				w.Write(resp)
 			}
-		} else {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("No product name specified!"))
 		}
 	}
 }
