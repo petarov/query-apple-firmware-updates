@@ -10,15 +10,15 @@ import (
 )
 
 type Device struct {
-	Id      int    `json:"-"`
-	Product string `json:"product"`
-	Name    string `json:"name"`
+	Id      int             `json:"-"`
+	Product string          `json:"product"`
+	Name    string          `json:"name"`
+	Updates []*DeviceUpdate `json:"updates"`
 }
 
 type DeviceUpdate struct {
 	Id         int              `json:"-"`
 	DeviceId   int              `json:"-"`
-	Device     *Device          `json:"device"`
 	BuildId    string           `json:"build_id"`
 	Version    string           `json:"version"`
 	ReleasedOn string           `json:"released_on"`
@@ -147,9 +147,9 @@ func FetchDeviceByProduct(product string) (*Device, error) {
 	return device, nil
 }
 
-func FetchUpdatesByProduct(product string) ([]*DeviceUpdate, error) {
+func FetchDeviceUpdatesByProduct(product string) (*Device, error) {
 	rows, err := db.Query(`
-	SELECT du.*, d.* FROM DeviceUpdate AS du
+	SELECT d.*, du.* FROM DeviceUpdate AS du
 	LEFT JOIN Device AS d ON du.device_id = d.id
 	WHERE d.product = $1`, product)
 	if err != nil {
@@ -157,14 +157,15 @@ func FetchUpdatesByProduct(product string) ([]*DeviceUpdate, error) {
 	}
 	defer rows.Close()
 
-	updates := make([]*DeviceUpdate, 0)
+	device := new(Device)
+	device.Updates = make([]*DeviceUpdate, 0)
+
 	for rows.Next() {
 		attributes := ""
 		update := new(DeviceUpdate)
-		update.Device = new(Device)
 
-		err := rows.Scan(&update.Id, &update.DeviceId, &update.BuildId, &update.Version, &update.ReleasedOn, &attributes,
-			&update.Device.Id, &update.Device.Product, &update.Device.Name)
+		err := rows.Scan(&device.Id, &device.Product, &device.Name,
+			&update.Id, &update.DeviceId, &update.BuildId, &update.Version, &update.ReleasedOn, &attributes)
 		if err != nil {
 			return nil, fmt.Errorf("Error scanning device row: %w", err)
 		}
@@ -174,14 +175,14 @@ func FetchUpdatesByProduct(product string) ([]*DeviceUpdate, error) {
 			return nil, err
 		}
 
-		updates = append(updates, update)
+		device.Updates = append(device.Updates, update)
 	}
 
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
 
-	return updates, nil
+	return device, nil
 }
 
 func AddUpdates(product string, updatesInfo []*client.IPSWInfo) (int, error) {

@@ -18,6 +18,10 @@ func ServeNow() (err error) {
 	ctx := new(ServerContext)
 	ctx.router = http.NewServeMux()
 
+	// ctx.router.HandleFunc("/debug/pprof/", pprof.Index)
+	// ctx.router.HandleFunc("/debug/pprof/{action}", pprof.Index)
+	// ctx.router.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+
 	ctx.ipswClient, err = client.NewIPSWClient()
 	if err != nil {
 		return err

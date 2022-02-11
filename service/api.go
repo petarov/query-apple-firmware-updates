@@ -90,18 +90,18 @@ func (api *Api) handleUpdateInfo() http.HandlerFunc {
 			return
 		}
 
-		updates, err := db.FetchUpdatesByProduct(product)
+		device, err := db.FetchDeviceUpdatesByProduct(product)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprintf(w, "Error fetching updates from database: %v", err)
 			return
 		}
 
-		if len(updates) > 0 {
+		if len(device.Updates) > 0 {
 			fmt.Println("Fetching from database ....")
 
 			// TODO: schedule update
-			resp, _ := json.Marshal(updates)
+			resp, _ := json.Marshal(device)
 			w.Header().Set("Content-Type", "application/json")
 			w.Write(resp)
 		} else {
