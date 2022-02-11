@@ -97,15 +97,7 @@ func (api *Api) handleUpdateInfo() http.HandlerFunc {
 			return
 		}
 
-		if len(device.Updates) > 0 {
-			fmt.Println("Fetching from database ....")
-
-			// TODO: schedule update
-			resp, _ := json.Marshal(device)
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(resp)
-		} else {
-			fmt.Println("Fetching from remote ....")
+		if len(device.Updates) == 0 {
 			ipsw, err := client.IPSWGetInfo(api.ctx.ipswClient, product)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
@@ -113,10 +105,19 @@ func (api *Api) handleUpdateInfo() http.HandlerFunc {
 			} else {
 				db.AddUpdates(product, ipsw)
 
-				resp, _ := json.Marshal(ipsw)
-				w.Header().Set("Content-Type", "application/json")
-				w.Write(resp)
+				device, err = db.FetchDeviceUpdatesByProduct(product)
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					fmt.Fprintf(w, "Error fetching updates from database: %v", err)
+					return
+				}
 			}
+		} else {
+			// TODO: schedule update
 		}
+
+		resp, _ := json.Marshal(device)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(resp)
 	}
 }
