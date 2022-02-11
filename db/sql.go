@@ -151,7 +151,8 @@ func FetchDeviceUpdatesByProduct(product string) (*Device, error) {
 	rows, err := db.Query(`
 	SELECT d.*, du.* FROM DeviceUpdate AS du
 	LEFT JOIN Device AS d ON du.device_id = d.id
-	WHERE d.product = $1`, product)
+	WHERE d.product = $1 
+	ORDER BY DATETIME(du.released_on) DESC`, product)
 	if err != nil {
 		return nil, fmt.Errorf("Error fetching device updates for %s: %w", product, err)
 	}
