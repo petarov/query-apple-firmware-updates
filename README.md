@@ -4,7 +4,14 @@ A web service that delivers firmwware updates info about Apple hardware.
 
 # API
 
-    // TODO
+// TODO
+
+Here is a list of available API calls.
+
+- `/api` - shows all available junctions
+- `/api/devices` - Fetches a list of all Apple devices
+- `/api/devices/:product` - Fetches a single Apple device by product name
+- `/api/updates/:product` - Fetches devices update info by product name
     
 # Installation
 
