@@ -5,8 +5,8 @@ import (
 )
 
 type Job struct {
-	Args []interface{}
-	Run  func()
+	Params []interface{}
+	Run    func([]interface{})
 }
 
 type WokerPool struct {
@@ -48,6 +48,6 @@ func (wp *WokerPool) QueueJob(job *Job) bool {
 
 func worker(pool *WokerPool) {
 	for job := range pool.jobChan {
-		job.Run()
+		job.Run(job.Params)
 	}
 }
