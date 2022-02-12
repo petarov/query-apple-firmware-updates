@@ -12,6 +12,7 @@ import (
 type ServerContext struct {
 	router     *http.ServeMux
 	ipswClient *http.Client
+	workerPool *WokerPool
 }
 
 func ServeNow() (err error) {
@@ -35,6 +36,9 @@ func ServeNow() (err error) {
 	if err = db.InitDb(config.DbPath, jsonDB); err != nil {
 		return err
 	}
+
+	ctx.workerPool = NewWorkPool()
+	ctx.workerPool.Start()
 
 	attachApi(ctx)
 

@@ -114,6 +114,12 @@ func (api *Api) handleUpdateInfo() http.HandlerFunc {
 			}
 		} else {
 			// TODO: schedule update
+			api.ctx.workerPool.QueueJob(&Job{
+				nil,
+				func() {
+					fmt.Println("UPDATING ... ")
+				},
+			})
 		}
 
 		resp, _ := json.Marshal(device)
