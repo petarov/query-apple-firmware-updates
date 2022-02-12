@@ -39,7 +39,7 @@ func (api *Api) handleIndex() http.HandlerFunc {
 			API_INDEX:                 "Shows this",
 			API_DEVICES:               "Fetches a list of all Apple devices",
 			API_DEVICES + "/:product": "Fetches a single Apple device by product name",
-			API_UPDATES + "/:product": "Fetches devices update info by product name",
+			API_UPDATES + "/:product": "Fetches device updates by product name",
 		}
 		resp, _ := json.Marshal(routes)
 		w.Header().Set("Content-Type", "application/json")
