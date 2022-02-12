@@ -199,13 +199,13 @@ func AddUpdates(product string, updatesInfo []*client.IPSWInfo) (int, error) {
 
 	inserted := 0
 
-	stmt, err := db.Prepare(`INSERT INTO DeviceUpdate(device_id, build_id, version, released_on, attributes) 
-	VALUES(?, ?, ?, ?, ?)`)
+	tx, err := db.Begin()
 	if err != nil {
 		return 0, err
 	}
 
-	tx, err := db.Begin()
+	stmt, err := tx.Prepare(`INSERT INTO DeviceUpdate(device_id, build_id, version, released_on, attributes) 
+	VALUES(?, ?, ?, ?, ?)`)
 	if err != nil {
 		return 0, err
 	}
