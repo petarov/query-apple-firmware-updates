@@ -4,16 +4,18 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/petarov/query-apple-osupdates/client"
 )
 
 type Device struct {
-	Id      int             `json:"-"`
-	Product string          `json:"product"`
-	Name    string          `json:"name"`
-	Updates []*DeviceUpdate `json:"updates"`
+	Id            int             `json:"-"`
+	Product       string          `json:"product"`
+	Name          string          `json:"name"`
+	LastCheckedOn string          `json:"last_checked_on"`
+	Updates       []*DeviceUpdate `json:"updates"`
 }
 
 type DeviceUpdate struct {
@@ -56,7 +58,8 @@ func createSchema() (err error) {
 	CREATE TABLE IF NOT EXISTS Device (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		product TEXT UNIQUE NOT NULL,
-		name TEXT NOT NULL
+		name TEXT NOT NULL,
+		last_checked_on TEXT NOT NULL
 	);`
 
 	if _, err = db.Exec(stmtDevice); err != nil {
@@ -96,10 +99,12 @@ func addDevices(jsonDB *DevicesJsonDB) (int, error) {
 
 	inserted := 0
 
+	now := time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
+
 	for k, v := range jsonDB.mapping {
 		_, ok := lookup[k]
 		if !ok {
-			_, err := db.Exec(`INSERT INTO Device(product, name) VALUES($1, $2)`, k, v)
+			_, err := db.Exec(`INSERT INTO Device(product, name, last_checked_on) VALUES($1, $2, $3)`, k, v, now)
 			if err != nil {
 				return 0, err
 			}
@@ -121,7 +126,7 @@ func FetchAllDevices() ([]*Device, error) {
 	devices := make([]*Device, 0)
 	for rows.Next() {
 		device := new(Device)
-		err := rows.Scan(&device.Id, &device.Product, &device.Name)
+		err := rows.Scan(&device.Id, &device.Product, &device.Name, &device.LastCheckedOn)
 		if err != nil {
 			return nil, fmt.Errorf("Error scanning device row: %w", err)
 		}
@@ -139,7 +144,7 @@ func FetchDeviceByProduct(product string) (*Device, error) {
 	device := new(Device)
 
 	err := db.QueryRow(`SELECT * FROM Device WHERE product = $1`, product).Scan(
-		&device.Id, &device.Product, &device.Name)
+		&device.Id, &device.Product, &device.Name, &device.LastCheckedOn)
 	if err != nil {
 		return nil, fmt.Errorf("Error fetching device by product '%s': %w", product, err)
 	}
@@ -165,7 +170,7 @@ func FetchDeviceUpdatesByProduct(product string) (*Device, error) {
 		attributes := ""
 		update := new(DeviceUpdate)
 
-		err := rows.Scan(&device.Id, &device.Product, &device.Name,
+		err := rows.Scan(&device.Id, &device.Product, &device.Name, &device.LastCheckedOn,
 			&update.Id, &update.DeviceId, &update.BuildId, &update.Version, &update.ReleasedOn, &attributes)
 		if err != nil {
 			return nil, fmt.Errorf("Error scanning device row: %w", err)
