@@ -226,6 +226,13 @@ func AddUpdates(product string, updatesInfo []*client.IPSWInfo) (int, error) {
 
 	stmt.Close()
 
+	now := time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
+
+	_, err = tx.Exec(`UPDATE Device SET last_checked_on=$1 WHERE id=$2`, now, device.Id)
+	if err != nil {
+		return 0, err
+	}
+
 	err = tx.Commit()
 	if err != nil {
 		return 0, err
