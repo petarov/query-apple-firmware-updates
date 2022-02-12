@@ -22,7 +22,9 @@ func NewWorkPool() *WokerPool {
 
 func (wp *WokerPool) Start() {
 	maxWorkers := runtime.GOMAXPROCS(0) - 1
-	if maxWorkers <= 0 {
+	if maxWorkers > 2 {
+		maxWorkers = 2
+	} else if maxWorkers <= 0 {
 		maxWorkers = 1
 	}
 
