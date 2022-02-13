@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/petarov/query-apple-osupdates/client"
+	"github.com/petarov/query-apple-osupdates/config"
 	"github.com/petarov/query-apple-osupdates/db"
 )
 
@@ -98,6 +100,8 @@ func (api *Api) handleUpdateInfo() http.HandlerFunc {
 		}
 
 		if len(device.Updates) == 0 {
+			fmt.Printf("Fetching info for product %s ...\n", product)
+
 			ipsw, err := client.IPSWGetInfo(api.ctx.ipswClient, product)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
@@ -113,15 +117,25 @@ func (api *Api) handleUpdateInfo() http.HandlerFunc {
 				}
 			}
 		} else {
-			// schedule product update
-			api.ctx.workerPool.QueueJob(&Job{
-				[]interface{}{product},
+			// schedule product update, if last check time has expired
+			if device.LastCheckedOnParsed.Add(time.Minute * time.Duration(config.DbUpdateRefreshIntervalMins)).Before(time.Now().UTC()) {
+				api.ctx.workerPool.QueueJob(&Job{
+					[]interface{}{product},
 
-				func(params []interface{}) {
-					pr := params[0].(string)
-					fmt.Printf("Updating device %s\n", pr)
-				},
-			})
+					func(params []interface{}) {
+						productParam := params[0].(string)
+
+						fmt.Printf("Updating info for product %s ...\n", productParam)
+
+						ipsw, err := client.IPSWGetInfo(api.ctx.ipswClient, productParam)
+						if err == nil {
+							db.AddUpdates(productParam, ipsw)
+						} else {
+							fmt.Println("%w", err)
+						}
+					},
+				})
+			}
 		}
 
 		resp, _ := json.Marshal(device)

@@ -11,11 +11,12 @@ import (
 )
 
 type Device struct {
-	Id            int             `json:"-"`
-	Product       string          `json:"product"`
-	Name          string          `json:"name"`
-	LastCheckedOn string          `json:"last_checked_on"`
-	Updates       []*DeviceUpdate `json:"updates"`
+	Id                  int             `json:"-"`
+	Product             string          `json:"product"`
+	Name                string          `json:"name"`
+	LastCheckedOn       string          `json:"last_checked_on"`
+	LastCheckedOnParsed time.Time       `json:"-"`
+	Updates             []*DeviceUpdate `json:"updates"`
 }
 
 type DeviceUpdate struct {
@@ -26,6 +27,8 @@ type DeviceUpdate struct {
 	ReleasedOn string           `json:"released_on"`
 	Attributes *client.IPSWInfo `json:"attributes"`
 }
+
+const DATE_TIME_LAYOUT = "2006-01-02T15:04:05.000Z"
 
 var db *sql.DB
 
@@ -99,7 +102,7 @@ func addDevices(jsonDB *DevicesJsonDB) (int, error) {
 
 	inserted := 0
 
-	now := time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
+	now := time.Now().UTC().Format(DATE_TIME_LAYOUT)
 
 	for k, v := range jsonDB.mapping {
 		_, ok := lookup[k]
@@ -130,6 +133,12 @@ func FetchAllDevices() ([]*Device, error) {
 		if err != nil {
 			return nil, fmt.Errorf("Error scanning device row: %w", err)
 		}
+
+		device.LastCheckedOnParsed, err = time.Parse(DATE_TIME_LAYOUT, device.LastCheckedOn)
+		if err != nil {
+			return nil, fmt.Errorf("Error parsing last update check date time '%s' : %w", device.LastCheckedOn, err)
+		}
+
 		devices = append(devices, device)
 	}
 
@@ -147,6 +156,11 @@ func FetchDeviceByProduct(product string) (*Device, error) {
 		&device.Id, &device.Product, &device.Name, &device.LastCheckedOn)
 	if err != nil {
 		return nil, fmt.Errorf("Error fetching device by product '%s': %w", product, err)
+	}
+
+	device.LastCheckedOnParsed, err = time.Parse(DATE_TIME_LAYOUT, device.LastCheckedOn)
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing last update check date time '%s' : %w", device.LastCheckedOn, err)
 	}
 
 	return device, nil
@@ -188,6 +202,11 @@ func FetchDeviceUpdatesByProduct(product string) (*Device, error) {
 		return nil, err
 	}
 
+	device.LastCheckedOnParsed, err = time.Parse(DATE_TIME_LAYOUT, device.LastCheckedOn)
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing last update check date time '%s' : %w", device.LastCheckedOn, err)
+	}
+
 	return device, nil
 }
 
@@ -226,7 +245,7 @@ func AddUpdates(product string, updatesInfo []*client.IPSWInfo) (int, error) {
 
 	stmt.Close()
 
-	now := time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
+	now := time.Now().UTC().Format(DATE_TIME_LAYOUT)
 
 	_, err = tx.Exec(`UPDATE Device SET last_checked_on=$1 WHERE id=$2`, now, device.Id)
 	if err != nil {

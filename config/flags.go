@@ -9,4 +9,6 @@ var (
 	DevicePath string
 	// SQLite Database file path
 	DbPath string
+	// How often to refresh updates in the database, in minutes
+	DbUpdateRefreshIntervalMins int
 )

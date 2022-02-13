@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	DEFAULT_PORT = 7095
-	HEART        = "\u2764"
+	DEFAULT_PORT         = 7095
+	DEFAULT_REFRESH_MINS = 60 * 24
+	HEART                = "\u2764"
 )
 
 func init() {
@@ -19,6 +20,8 @@ func init() {
 	flag.IntVar(&config.ListenPort, "port", DEFAULT_PORT, "Server listen port")
 	flag.StringVar(&config.DevicePath, "devices", "", "Path to devices index registry JSON file")
 	flag.StringVar(&config.DbPath, "db", "", "Path to SQLite database file")
+	flag.IntVar(&config.DbUpdateRefreshIntervalMins, "r", DEFAULT_REFRESH_MINS, "Interval in minutes: how often to refresh updates in the database")
+
 }
 
 func verifyPath(path string, what string, mustExist bool) {
