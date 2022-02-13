@@ -202,9 +202,11 @@ func FetchDeviceUpdatesByProduct(product string) (*Device, error) {
 		return nil, err
 	}
 
-	device.LastCheckedOnParsed, err = time.Parse(DATE_TIME_LAYOUT, device.LastCheckedOn)
-	if err != nil {
-		return nil, fmt.Errorf("Error parsing last update check date time '%s' : %w", device.LastCheckedOn, err)
+	if len(device.Updates) > 0 {
+		device.LastCheckedOnParsed, err = time.Parse(DATE_TIME_LAYOUT, device.LastCheckedOn)
+		if err != nil {
+			return nil, fmt.Errorf("Error parsing last update check date time '%s' : %w", device.LastCheckedOn, err)
+		}
 	}
 
 	return device, nil
