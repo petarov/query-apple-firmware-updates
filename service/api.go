@@ -54,7 +54,7 @@ func (api *Api) handleIndex() http.HandlerFunc {
 
 func (api *Api) handleDevices() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		product := strings.TrimPrefix(r.URL.Path, API_DEVICES+"/")
+		product := strings.TrimPrefix(strings.TrimPrefix(r.URL.Path, API_DEVICES), "/")
 		if len(product) > 0 {
 
 			device, err := db.FetchDeviceByProduct(product)
