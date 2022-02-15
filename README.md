@@ -14,7 +14,7 @@ Run `make` to produce binaries in the `dist` folder.
 
 To start the service on `[::1]:7095` run:
 
-    ./qaous_linux_amd64 -db database.db -devices devices.json
+    ./qados_linux_amd64 -devices devices.json -db database.db
 
 # API
 
@@ -23,6 +23,7 @@ List of available API calls:
 - `/api` - shows all available junctions
 - `/api/devices` - Fetches a list of all Apple devices
 - `/api/devices/:product` - Fetches a single Apple device by product name
+- `/api/devices/search?key=:key` - Fetches a list of matching devices given the `key` parameter
 - `/api/updates/:product` - Fetches device updates by product name
 
 # License 
