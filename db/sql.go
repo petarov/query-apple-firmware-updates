@@ -16,7 +16,7 @@ type Device struct {
 	Name                string          `json:"name"`
 	LastCheckedOn       string          `json:"last_checked_on"`
 	LastCheckedOnParsed time.Time       `json:"-"`
-	Updates             []*DeviceUpdate `json:"updates"`
+	Updates             []*DeviceUpdate `json:"updates,omitempty"`
 }
 
 type DeviceUpdate struct {
@@ -25,7 +25,7 @@ type DeviceUpdate struct {
 	BuildId    string           `json:"build_id"`
 	Version    string           `json:"version"`
 	ReleasedOn string           `json:"released_on"`
-	Attributes *client.IPSWInfo `json:"attributes"`
+	Attributes *client.IPSWInfo `json:"attributes,omitempty"`
 }
 
 const DATE_TIME_LAYOUT = "2006-01-02T15:04:05.000Z"
@@ -137,6 +137,32 @@ func FetchAllDevices() ([]*Device, error) {
 		device.LastCheckedOnParsed, err = time.Parse(DATE_TIME_LAYOUT, device.LastCheckedOn)
 		if err != nil {
 			return nil, fmt.Errorf("Error parsing last update check date time '%s' : %w", device.LastCheckedOn, err)
+		}
+
+		devices = append(devices, device)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return devices, nil
+}
+
+func FetchAllDevicesByKey(key string) ([]*Device, error) {
+	rows, err := db.Query(`SELECT * FROM Device 
+	WHERE product LIKE $1||'%' OR product LIKE '%'||$2||'%' OR name LIKE '%'||$3||'%'`, key, key, key)
+	if err != nil {
+		return nil, fmt.Errorf("Error searching devices: %w", err)
+	}
+	defer rows.Close()
+
+	devices := make([]*Device, 0)
+	for rows.Next() {
+		device := new(Device)
+		err := rows.Scan(&device.Id, &device.Product, &device.Name, &device.LastCheckedOn)
+		if err != nil {
+			return nil, fmt.Errorf("Error scanning device row: %w", err)
 		}
 
 		devices = append(devices, device)

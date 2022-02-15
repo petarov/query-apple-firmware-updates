@@ -30,6 +30,8 @@ func attachApi(serverCtx *ServerContext) {
 	api := &Api{serverCtx}
 	api.ctx.router.HandleFunc(API_INDEX, api.handleIndex())
 	api.ctx.router.HandleFunc(API_INDEX+"/", api.handleIndex())
+	api.ctx.router.HandleFunc(API_DEVICES+"/search", api.handleDeviceSearch())
+	api.ctx.router.HandleFunc(API_DEVICES+"/search/", api.handleDeviceSearch())
 	api.ctx.router.HandleFunc(API_DEVICES, api.handleDevices())
 	api.ctx.router.HandleFunc(API_DEVICES+"/", api.handleDevices())
 	api.ctx.router.HandleFunc(API_UPDATES+"/", api.handleUpdateInfo())
@@ -38,10 +40,11 @@ func attachApi(serverCtx *ServerContext) {
 func (api *Api) handleIndex() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		routes := map[string]string{
-			API_INDEX:                 "Shows this",
-			API_DEVICES:               "Fetches a list of all Apple devices",
-			API_DEVICES + "/:product": "Fetches a single Apple device by product name",
-			API_UPDATES + "/:product": "Fetches device updates by product name",
+			API_INDEX:                        "Shows this",
+			API_DEVICES:                      "Fetches a list of all Apple devices",
+			API_DEVICES + "/:product":        "Fetches a single Apple device by product name",
+			API_DEVICES + "/search?key=:key": "Fetches a list of devices given a key parameter",
+			API_UPDATES + "/:product":        "Fetches device updates by product name",
 		}
 		resp, _ := json.Marshal(routes)
 		w.Header().Set("Content-Type", "application/json")
@@ -78,6 +81,34 @@ func (api *Api) handleDevices() http.HandlerFunc {
 				// w.Header().Set("Content-Length", strconv.Itoa(len(resp)))
 				w.Write(resp)
 			}
+		}
+	}
+}
+
+func (api *Api) handleDeviceSearch() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		key := strings.TrimSpace(r.URL.Query().Get("key"))
+		noResults := false
+
+		if len(key) > 0 {
+			devices, err := db.FetchAllDevicesByKey(key)
+			if errors.Is(err, sql.ErrNoRows) {
+				noResults = true
+			} else if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Fprintf(w, "Error: %v", err)
+			} else {
+				resp, _ := json.Marshal(devices)
+				w.Header().Set("Content-Type", "application/json")
+				w.Write(resp)
+			}
+		} else {
+			noResults = true
+		}
+
+		if noResults {
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte("[]"))
 		}
 	}
 }
