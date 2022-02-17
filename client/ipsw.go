@@ -8,6 +8,8 @@ import (
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/petarov/query-apple-osupdates/config"
 )
 
 const INFO_URL = "https://api.ipsw.me/v2.1/%s/latest/info.json"
@@ -55,8 +57,7 @@ func IPSWGetInfo(client *http.Client, product string) (ipsw []*IPSWInfo, err err
 	req.Header.Add("Accept-Encoding", "gzip")
 	req.Header.Add("Cache-Control", "no-cache")
 	req.Header.Add("Pragma", "no-cache")
-	// ua := uarand.GetRandom()
-	// req.Header.Add("User-Agent", ua)
+	req.Header.Add("User-Agent", fmt.Sprintf("qados-v%s", config.VERSION))
 
 	resp, err := client.Do(req)
 	if err != nil {
