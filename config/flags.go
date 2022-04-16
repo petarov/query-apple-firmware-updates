@@ -11,4 +11,6 @@ var (
 	DbPath string
 	// How often to refresh updates in the database, in minutes
 	DbUpdateRefreshIntervalMins int
+	// Location of the static web app files
+	WebAppPath string
 )

@@ -41,6 +41,7 @@ func ServeNow() (err error) {
 	ctx.workerPool.Start()
 
 	attachApi(ctx)
+	attachWww(ctx)
 
 	fmt.Printf("Serving at %s and port %d ...\n", config.ListenAddress, config.ListenPort)
 
