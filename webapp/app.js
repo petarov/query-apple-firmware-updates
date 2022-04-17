@@ -55,5 +55,18 @@ function getDeviceHtml(template, device) {
     tpl = tpl.replace(/__PRODUCT__/g, device.product);
     tpl = tpl.replace(/__NAME__/g, device.name);
     tpl = tpl.replace(/__LAST_CHECK__/g, new Date(device.last_checked_on).toLocaleString());
+    var iconName = 'fab fa-apple';
+    // if (device.product.indexOf('iPhone') != -1) {
+    //     iconName = 'fas fa-mobile-alt';
+    if (device.product.indexOf('iPad') != -1) {
+        iconName = 'fas fa-tablet';
+    } else if (device.product.indexOf('iMac') != -1) {
+        iconName = 'fas fa-desktop';
+    } else if (device.product.indexOf('MacBook') != -1) {
+        iconName = 'fas fa-laptop';
+    // } else if (device.product.indexOf('iPod') != -1) {
+    //     iconName = 'fas fa-mp3-player';
+    }
+    tpl = tpl.replace(/__ICON_NAME__/g, iconName);
     return tpl;
 }
