@@ -1,5 +1,6 @@
 (async () => {
     const DEVICE_TEMPLATE = document.getElementById('device-item-template').innerHTML;
+    const UPDATE_TEMPLATE = document.getElementById('update-item-template').innerHTML;
     const RESULTS = document.getElementById('results');
     const TERM = document.getElementById('term');
 
@@ -11,11 +12,42 @@
             if (results.length > 0) {
                 RESULTS.innerHTML = '';
                 for (const device of results) {
-                    RESULTS.insertAdjacentHTML("beforeend", getDeviceHtml(DEVICE_TEMPLATE, device));
+                    RESULTS.insertAdjacentHTML('beforeend', getDeviceHtml(DEVICE_TEMPLATE, device));
+                }
+
+                const updateButtons = document.querySelectorAll('.update-btn');
+                for (const btn of updateButtons) {
+                    btn.addEventListener('click', (event) => {
+                        const product = event.target.dataset.product;
+                        getUpdates(event.target.dataset.product, (err, json) => {
+                            if (err) {
+                                document.getElementById("updates" + product).innerHTML = err;
+                            } else {
+                                var container = document.getElementById("updates-body-" + product);
+                                if (json.updates) {
+                                    for (let i = 0; i < json.updates.length; i++) {
+                                        container.insertAdjacentHTML('beforeend', getUpdateHtml(UPDATE_TEMPLATE, i + 1, json.updates[i]));
+                                    }
+                                }
+                                container.parentElement.classList.remove('is-hidden');
+                            }
+                        });
+                        event.target.remove();
+                    });
                 }
             } else {
                 RESULTS.innerHTML = 'No devices found';
             }
+        };
+
+        const getUpdates = (product, cb) => {
+            fetch(`/api/updates/${product}`).then(response => {
+                if (response.status / 100 === 2) {
+                    response.json().then(data => cb(null, data));
+                } else {
+                    cb(`HTTP Err: ${response.status} ${response.statusText}`, null);
+                }
+            }).catch(err => cb(err, null));
         };
 
         const search = (term, cb) => {
@@ -31,10 +63,6 @@
         search(term, (err, json) => {
             if (err) {
                 RESULTS.innerHTML = err;
-                if (json != null) {
-                    RESULTS.innerHTML += "<br>";
-                    RESULTS.innerHTML += JSON.parse(json).errorMessage;
-                }
             } else {
                 display(json);
             }
@@ -68,5 +96,17 @@ function getDeviceHtml(template, device) {
     //     iconName = 'fas fa-mp3-player';
     }
     tpl = tpl.replace(/__ICON_NAME__/g, iconName);
+    return tpl;
+}
+
+function getUpdateHtml(template, row, update) {
+    var tpl = template.slice(0);
+    tpl = tpl.replace(/__ROW__/g, row);
+    tpl = tpl.replace(/__VERSION__/g, update.version);
+    tpl = tpl.replace(/__BUILD__/g, update.build_id);
+    tpl = tpl.replace(/__RELEASE_DATE__/g, new Date(update.released_on).toLocaleString());
+    tpl = tpl.replace(/__FILESIZE__/g, Math.round((update.attributes.size/(1024*1024*1024)) * 100) / 100 + "GB");
+    tpl = tpl.replace(/__FILENAME__/g, update.attributes.filename);
+    tpl = tpl.replace(/__LINK__/g, update.attributes.url);
     return tpl;
 }

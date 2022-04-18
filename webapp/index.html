@@ -108,11 +108,41 @@
                             </div>
                         </div>
                     </p>
-                </device>
+                    <p class="control" id="updates-__PRODUCT__">
+                        <button class="button is-info update-btn" data-product="__PRODUCT__">Check Updates</button>
+                        <table class="table is-hidden">
+                            <thead>
+                                <th>#</th>
+                                <th>Version</th>
+                                <th>Build ID</th>
+                                <th>Released on</th>
+                                <th>Size</th>
+                                <th>Download</th>
+                            </thead>
+                            <tbody id="updates-body-__PRODUCT__">
+                            </tbody>
+                        </table>
+                    </p>
+                </div>
             </div>
         </article>
     </script>
-
+    <script id="update-item-template" type="text/x-custom-template">
+        <tr>
+            <th>__ROW__</th>
+            <td>__VERSION__</td>
+            <td>__BUILD__</td>
+            <td>__RELEASE_DATE__</td>
+            <td>__FILESIZE__</td>
+            <td>
+                <a href="__LINK__" title="__FILENAME__">
+                    <span class="icon is-small">
+                        <i class="fas fa-cloud-download-alt"></i>
+                    </span>
+                </a>
+            </td>
+        </tr>
+    </script>
     <script src="app.js"></script>
 </body>
 </html>
