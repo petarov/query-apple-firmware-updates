@@ -1,13 +1,17 @@
 package service
 
 import (
+	"embed"
 	"fmt"
+	"io/fs"
 	"net/http"
-
-	"github.com/petarov/query-apple-osupdates/config"
 )
+
+//go:embed static/*
+var staticFiles embed.FS
 
 func attachWww(serverCtx *ServerContext) {
 	fmt.Printf("Attaching web app ...\n")
-	serverCtx.router.Handle("/", http.FileServer(http.Dir(config.WebAppPath)))
+	html, _ := fs.Sub(staticFiles, "static")
+	serverCtx.router.Handle("/", http.FileServer(http.FS(html)))
 }

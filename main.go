@@ -21,7 +21,6 @@ func init() {
 	flag.StringVar(&config.DevicePath, "devices", "", "Path to devices index registry JSON file")
 	flag.StringVar(&config.DbPath, "db", "", "Path to SQLite database file")
 	flag.IntVar(&config.DbUpdateRefreshIntervalMins, "r", DEFAULT_REFRESH_MINS, "Interval in minutes: how often to refresh updates in the database")
-	flag.StringVar(&config.WebAppPath, "www", "./webapp", "Path to web app files")
 }
 
 func verifyPath(path string, what string, mustExist bool) {
