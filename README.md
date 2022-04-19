@@ -1,4 +1,4 @@
-# Query Apple Devices OS Updates
+# Query Apple Devices Firmware Updates
 
 A web service that delivers firmware update infos about Apple devices.
 
@@ -14,7 +14,9 @@ Run `make` to produce binaries in the `dist` folder.
 
 To start the service on `[::1]:7095` run:
 
-    ./qados_linux_amd64 -devices devices.json -db database.db
+    ./qadfu_linux_amd64 -devices devices.json -db database.db
+
+The webapp is being served at `http://localhost:7095`.
 
 # API
 
