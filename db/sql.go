@@ -7,7 +7,7 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/petarov/query-apple-osupdates/client"
+	"github.com/petarov/query-apple-firmware-updates/client"
 )
 
 type Device struct {

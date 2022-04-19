@@ -1,4 +1,4 @@
-module github.com/petarov/query-apple-osupdates
+module github.com/petarov/query-apple-firmware-updates
 
 go 1.17
 

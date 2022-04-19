@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/petarov/query-apple-osupdates/config"
+	"github.com/petarov/query-apple-firmware-updates/config"
 )
 
 const INFO_URL = "https://api.ipsw.me/v2.1/%s/latest/info.json"

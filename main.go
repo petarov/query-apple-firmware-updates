@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/petarov/query-apple-osupdates/config"
-	"github.com/petarov/query-apple-osupdates/service"
+	"github.com/petarov/query-apple-firmware-updates/config"
+	"github.com/petarov/query-apple-firmware-updates/service"
 )
 
 const (

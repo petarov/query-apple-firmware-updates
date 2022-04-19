@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/petarov/query-apple-osupdates/client"
-	"github.com/petarov/query-apple-osupdates/config"
-	"github.com/petarov/query-apple-osupdates/db"
+	"github.com/petarov/query-apple-firmware-updates/client"
+	"github.com/petarov/query-apple-firmware-updates/config"
+	"github.com/petarov/query-apple-firmware-updates/db"
 )
 
 const (
