@@ -86,6 +86,18 @@ func createSchema() (err error) {
 		return fmt.Errorf("Failed create Update schema : %w", err)
 	}
 
+	if _, err = db.Exec(`CREATE VIRTUAL TABLE IF NOT EXISTS DeviceFTSI USING fts5(id, name)`); err != nil {
+		return fmt.Errorf("Failed create Device full-text index VT : %w", err)
+	}
+
+	return nil
+}
+
+func createFTSIndex() (err error) {
+	if _, err = db.Exec(`INSERT INTO DeviceFTSI SELECT id, name FROM Device`); err != nil {
+		return fmt.Errorf("Failed insert devices into full-text index VT : %w", err)
+	}
+
 	return nil
 }
 
@@ -107,7 +119,13 @@ func addDevices(jsonDB *DevicesJsonDB) (int, error) {
 	for k, v := range jsonDB.mapping {
 		_, ok := lookup[k]
 		if !ok {
-			_, err := db.Exec(`INSERT INTO Device(product, name, last_checked_on) VALUES($1, $2, $3)`, k, v, now)
+			res, err := db.Exec(`INSERT INTO Device(product, name, last_checked_on) VALUES($1, $2, $3)`, k, v, now)
+			if err != nil {
+				return 0, err
+			}
+
+			rowId, _ := res.LastInsertId()
+			_, err = db.Exec(`INSERT INTO DeviceFTSI(id, name) VALUES($1, $2)`, rowId, v)
 			if err != nil {
 				return 0, err
 			}
