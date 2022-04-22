@@ -169,7 +169,7 @@ func FetchAllDevices() ([]*Device, error) {
 
 func FetchAllDevicesByKey(key string) ([]*Device, error) {
 	rows, err := db.Query(`SELECT * FROM Device 
-	WHERE product LIKE $1||'%' OR product LIKE '%'||$2||'%' OR name LIKE '%'||$3||'%'`, key, key, key)
+	WHERE id IN (SELECT id FROM DeviceFTSI WHERE DeviceFTSI MATCH $1 ORDER BY rank)`, key)
 	if err != nil {
 		return nil, fmt.Errorf("Error searching devices: %w", err)
 	}
