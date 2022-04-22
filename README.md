@@ -28,6 +28,18 @@ List of available API calls:
 - `/api/devices/search?key=:key` - Fetches a list of matching devices given the `key` parameter
 - `/api/updates/:product` - Fetches device updates by product name
 
+# Development
+
+To install deps run:
+
+    go get
+
+To run the server:
+
+    go run -tags "fts5"  main.go -devices devices.json -db database.db
+
+The build tag `fts5` enables the SQLite FTS5 extension in the `mattn/go-sqlite3` lib.
+
 # License 
 
 [MIT](LICENSE)
