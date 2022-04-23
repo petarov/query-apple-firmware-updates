@@ -49,7 +49,7 @@ jobs:
       - name: Build binaries
         run: |
           GOOS=linux GOARCH=amd64 CGO_ENABLED=${{ env.cgo_enabled }} go build -ldflags "${{ env.ld_flags }}" -o qadfu_linux_amd64
-          GOOS=linux GOARCH=arm64 CGO_ENABLED=${{ env.cgo_enabled }} go build -ldflags "${{ env.ld_flags }}" -o qadfu_linux_arm64
+#          GOOS=linux GOARCH=arm64 CGO_ENABLED=${{ env.cgo_enabled }} go build -ldflags "${{ env.ld_flags }}" -o qadfu_linux_arm64
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
