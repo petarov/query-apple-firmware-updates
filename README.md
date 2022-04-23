@@ -1,5 +1,8 @@
 # Query Apple Devices Firmware Updates
 
+[![CI Build](https://github.com/petarov/query-apple-firmware-updates/actions/workflows/build.yml/badge.svg)](https://github.com/petarov/query-apple-firmware-updates/actions/workflows/build.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/petarov/query-apple-firmware-updates)](https://goreportcard.com/report/github.com/petarov/query-apple-firmware-updates)
+
 A web service that delivers firmware update infos about Apple devices.
 
 This is in fact a caching proxy for [ipsw.me](https://ipsw.me/). Update infos are being stored in a local SQLite database.
