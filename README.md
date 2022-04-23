@@ -19,7 +19,47 @@ To start the service on `[::1]:7095` run:
 
     ./qadfu_linux_amd64 -devices devices.json -db database.db
 
-The webapp is being served at `http://localhost:7095`.
+The webapp is available at `http://localhost:7095`.
+
+## Run as systemd daemon
+
+Download the binary and `devices.json` file to `/opt/qadfu/` on your server. 
+
+Create a bash `/opt/qadfu/start.sh` startup script:
+
+```bash 
+#!/bin/sh
+
+./qadfu_linux_amd64 -addr localhost -devices devices.json -db database.db
+```
+
+Create the following file under `/lib/systemd/system/qadfu.service`:
+
+```bash
+[Unit]
+Description=Query Apple Devices Firmware Updates
+After=nginx.service
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5s
+Restart=on-failure
+WorkingDirectory=/opt/qadfu
+ExecStart=/opt/qadfu/start.sh
+
+[Install]
+WantedBy=multi-user.target
+```
+
+To enable the systemctl service run:
+
+    systemctl reenable /lib/systemd/system/qadfu.service
+
+To start the service run:
+
+    systemctl start qadfu.service
+
 
 # API
 
