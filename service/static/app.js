@@ -41,7 +41,7 @@
         };
 
         const getUpdates = (product, cb) => {
-            fetch(`/api/updates/${product}`).then(response => {
+            fetch(`api/updates/${product}`).then(response => {
                 if (response.status / 100 === 2) {
                     response.json().then(data => cb(null, data));
                 } else {
@@ -51,7 +51,7 @@
         };
 
         const search = (term, cb) => {
-            fetch(`/api/devices/search?key=${term}`).then(response => {
+            fetch(`api/devices/search?key=${term}`).then(response => {
                 if (response.status / 100 === 2) {
                     response.json().then(data => cb(null, data));
                 } else {
