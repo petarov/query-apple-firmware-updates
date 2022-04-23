@@ -10,6 +10,7 @@ on:
         - "go.sum"
         - "**.js"
         - "**/index.html"
+        - "**.yml"
 
 env:
   ld_flags: '-s -w'
