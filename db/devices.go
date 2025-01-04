@@ -2,7 +2,7 @@ package db
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"os"
 )
 
@@ -17,7 +17,7 @@ func LoadDevices(path string) (*DevicesJsonDB, error) {
 	}
 	defer jsonFile.Close()
 
-	data, _ := ioutil.ReadAll(jsonFile)
+	data, _ := io.ReadAll(jsonFile)
 
 	var result = make(map[string]string)
 	json.Unmarshal(data, &result)

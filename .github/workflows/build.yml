@@ -19,10 +19,10 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: [ '1.17' ]
+        go: [ '1.23' ]
     steps:
       - name: Set up Go v${{ matrix.go }}
         uses: actions/setup-go@v2
